@@ -63,7 +63,7 @@ export default function SignUpScreen() {
           placeholderTextColor="#666"
         />
 
-        <View style={styles.userTypeContainer}>
+        {/* <View style={styles.userTypeContainer}>
           <TouchableOpacity
             style={[
               styles.userTypeButton,
@@ -96,7 +96,7 @@ export default function SignUpScreen() {
               Service Provider
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
