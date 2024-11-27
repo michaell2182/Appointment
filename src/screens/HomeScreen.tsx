@@ -1,25 +1,80 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ScrollView, TextInput, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MotiView } from 'moti';
+import MapView from 'react-native-maps';
+import { categories, businesses } from '../data/dummyData';
+import BusinessCard from '../components/BusinessCard';
 
-const dummyAppointments = [
-  { id: '1', service: 'Haircut', date: '2023-05-15', time: '14:00' },
-  { id: '2', service: 'Manicure', date: '2023-05-17', time: '10:30' },
-  { id: '3', service: 'Massage', date: '2023-05-20', time: '16:00' },
-];
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
+  const [selectedCategory, setSelectedCategory] = useState('1');
+  const [searchQuery, setSearchQuery] = useState('');
+  const insets = useSafeAreaInsets();
+
+  const filteredBusinesses = businesses.filter(
+    (business) =>
+      (selectedCategory === '1' || business.category === categories.find(c => c.id === selectedCategory)?.name) &&
+      business.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.welcomeText}>Hey, User! Where do you want to go?</Text>
+      <View style={styles.searchBarContainer}>
+        <Ionicons name="search" size={20} color="#666" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search places..."
+          placeholderTextColor="#666"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+    </View>
+  );
+
+  const renderCategories = useCallback(() => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.categoriesContainer}
+      contentContainerStyle={styles.categoriesContent}
+    >
+      {categories.map((category) => (
+        <TouchableOpacity
+          key={category.id}
+          style={[
+            styles.categoryButton,
+            selectedCategory === category.id && styles.selectedCategory,
+          ]}
+          onPress={() => setSelectedCategory(category.id)}
+        >
+          <Text style={[
+            styles.categoryText,
+            selectedCategory === category.id && styles.selectedCategoryText
+          ]}>
+            {category.name}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  ), [selectedCategory]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Upcoming Appointments</Text>
+      {renderHeader()}
+      {renderCategories()}
       <FlatList
-        data={dummyAppointments}
+        data={filteredBusinesses}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.appointmentItem}>
-            <Text style={styles.serviceName}>{item.service}</Text>
-            <Text>{item.date} at {item.time}</Text>
-          </View>
+          <BusinessCard business={item} />
         )}
+        contentContainerStyle={styles.businessList}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -28,23 +83,56 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  header: {
+    padding: 16,
+    backgroundColor: '#f8f8f8',
   },
-  appointmentItem: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  serviceName: {
+  welcomeText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0e0e0',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 8,
+    color: '#000',
+  },
+  categoriesContainer: {
+    marginVertical: 16,
+  },
+  categoriesContent: {
+    paddingHorizontal: 16,
+  },
+  categoryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    marginRight: 8,
+  },
+  selectedCategory: {
+    backgroundColor: '#007AFF',
+  },
+  categoryText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  selectedCategoryText: {
+    color: '#fff',
+  },
+  businessList: {
+    paddingHorizontal: 16,
   },
 });
 
