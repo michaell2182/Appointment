@@ -29,13 +29,8 @@ export default function SignUpScreen() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Create user account
-      await login({ 
-        email, 
-        userType: userType as 'client' | 'provider'
-      });
-      
-      // No need to navigate manually, AuthContext will handle it
+      // Navigate to onboarding instead of logging in directly
+      navigation.navigate('Onboarding');
     } catch (error) {
       alert("Sign up failed. Please try again.");
       setLoading(false);
